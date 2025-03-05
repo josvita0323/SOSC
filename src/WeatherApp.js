@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { FaSun, FaMoon } from "react-icons/fa";
 import "./index.css";
 
 const WeatherApp = () => {
@@ -12,7 +13,6 @@ const WeatherApp = () => {
   const API_KEY = "ab0d186f55bb7f452f4d24d9513d2349";
 
   const fetchWeather = async (unitType = unit) => {
-   
     const sanitizedCity = city.replace(/[^a-zA-Z\s]/g, "").trim();
 
     if (!sanitizedCity) {
@@ -26,7 +26,7 @@ const WeatherApp = () => {
         `https://api.openweathermap.org/data/2.5/weather?q=${sanitizedCity}&units=${unitType}&appid=${API_KEY}`
       );
       setWeather(response.data);
-      setError(""); // Clear error on successful fetch
+      setError("");
     } catch (error) {
       console.error("Error fetching weather data:", error);
       setWeather(null);
@@ -35,12 +35,8 @@ const WeatherApp = () => {
   };
 
   const getBackgroundStyle = () => {
-    if (!weather && !error) return { backgroundImage: "url(/images/default.jpeg)" };
-
-    if (error) {
-      return darkMode
-        ? { backgroundColor: "#1a202c", color: "white" }
-        : { backgroundColor: "lightblue", color: "#333" };
+    if (!weather || error) {
+      return { backgroundImage: "url(/images/default.jpg)" }; 
     }
 
     const condition = weather.weather[0].main.toLowerCase();
@@ -54,7 +50,7 @@ const WeatherApp = () => {
   const toggleUnit = () => {
     const newUnit = unit === "metric" ? "imperial" : "metric";
     setUnit(newUnit);
-    fetchWeather(newUnit); // Re-fetch weather in the new unit
+    fetchWeather(newUnit);
   };
 
   return (
@@ -62,41 +58,52 @@ const WeatherApp = () => {
       className={`app-container ${darkMode ? "dark" : ""}`}
       style={{ ...getBackgroundStyle(), backgroundSize: "cover", backgroundPosition: "center" }}
     >
-      <button onClick={() => setDarkMode(!darkMode)} className="mode-toggle">
-        {darkMode ? "Light Mode" : "Dark Mode"}
-      </button>
+     
+      <div className="toggle-container">
+        <label className="mode-toggle">
+          <input type="checkbox" checked={darkMode} onChange={() => setDarkMode(!darkMode)} />
+          <span className="slider">
+            <span className="toggle-icon">{darkMode ? <FaMoon /> : <FaSun />}</span>
+          </span>
+        </label>
+      </div>
 
       <h1 className="title">Weather App</h1>
+      <div className="weather-container">
+        <input
+          type="text"
+          value={city}
+          onChange={(e) => setCity(e.target.value)}
+          className="city-input"
+          placeholder="Enter city name..."
+        />
 
-      <input
-        type="text"
-        value={city}
-        onChange={(e) => setCity(e.target.value)}
-        className="city-input"
-        placeholder="Enter city name..."
-      />
-
-      <button onClick={() => fetchWeather()} className="get-weather">
-        Get Weather
-      </button>
-
-      {weather && (
-        <button onClick={toggleUnit} className="unit-toggle">
-          °C / °F
+        <button onClick={() => fetchWeather()} className="get-weather">
+          Get Weather
         </button>
-      )}
 
-      {error && <p className="error-message">{error}</p>}
+        {error && <p className="error-message">{error}</p>}
 
-      {weather && (
-        <div className="weather-info">
-          <h2>{weather.name}</h2>
-          <p>{weather.weather[0].description}</p>
-          <p className="temperature">{weather.main.temp}°{unit === "metric" ? "C" : "F"}</p>
-          <p>Humidity: {weather.main.humidity}%</p>
-          <p>Wind Speed: {weather.wind.speed} {unit === "metric" ? "m/s" : "mph"}</p>
-        </div>
-      )}
+        {weather && (
+          <div className="weather-info">
+            <h2>{weather.name}</h2>
+            <p>{weather.weather[0].description}</p>
+            <p className="temperature">{weather.main.temp}°{unit === "metric" ? "C" : "F"}</p>
+            <p>Humidity: {weather.main.humidity}%</p>
+            <p>Wind Speed: {weather.wind.speed} {unit === "metric" ? "m/s" : "mph"}</p>
+
+           
+            <div className="unit-toggle-container">
+              <span>°C</span>
+              <label className="unit-switch">
+                <input type="checkbox" checked={unit === "imperial"} onChange={toggleUnit} />
+                <span className="slider"></span>
+              </label>
+              <span>°F</span>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
