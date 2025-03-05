@@ -11,8 +11,8 @@ const WeatherApp = () => {
 
   const API_KEY = "ab0d186f55bb7f452f4d24d9513d2349";
 
-  const fetchWeather = async () => {
-    // Trim spaces and remove special characters except spaces and alphabets
+  const fetchWeather = async (unitType = unit) => {
+   
     const sanitizedCity = city.replace(/[^a-zA-Z\s]/g, "").trim();
 
     if (!sanitizedCity) {
@@ -23,10 +23,10 @@ const WeatherApp = () => {
 
     try {
       const response = await axios.get(
-        `https://api.openweathermap.org/data/2.5/weather?q=${sanitizedCity}&units=${unit}&appid=${API_KEY}`
+        `https://api.openweathermap.org/data/2.5/weather?q=${sanitizedCity}&units=${unitType}&appid=${API_KEY}`
       );
       setWeather(response.data);
-      setError(""); 
+      setError(""); // Clear error on successful fetch
     } catch (error) {
       console.error("Error fetching weather data:", error);
       setWeather(null);
@@ -45,10 +45,16 @@ const WeatherApp = () => {
 
     const condition = weather.weather[0].main.toLowerCase();
     if (condition.includes("cloud")) return { backgroundImage: "url(/images/cloudy.jpeg)" };
-    if (condition.includes("clear")) return { backgroundImage: "url(/images/sunny.jpeg)" };
+    if (condition.includes("clear")) return { backgroundImage: "url(/images/sunny1.jpg)" };
     if (condition.includes("rain")) return { backgroundImage: "url(/images/rainy.jpeg)" };
 
     return { backgroundImage: "url(/images/default.jpg)" };
+  };
+
+  const toggleUnit = () => {
+    const newUnit = unit === "metric" ? "imperial" : "metric";
+    setUnit(newUnit);
+    fetchWeather(newUnit); // Re-fetch weather in the new unit
   };
 
   return (
@@ -70,12 +76,12 @@ const WeatherApp = () => {
         placeholder="Enter city name..."
       />
 
-      <button onClick={fetchWeather} className="get-weather">
+      <button onClick={() => fetchWeather()} className="get-weather">
         Get Weather
       </button>
 
       {weather && (
-        <button onClick={() => setUnit(unit === "metric" ? "imperial" : "metric")} className="unit-toggle">
+        <button onClick={toggleUnit} className="unit-toggle">
           °C / °F
         </button>
       )}
